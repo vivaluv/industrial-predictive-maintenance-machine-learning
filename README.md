@@ -102,15 +102,15 @@ The following sections present the key findings from the exploratory analysis.
 
 ### Features
 
-| Feature | Description |
-|---------|-------------|
-| Air_temperature_K | Air temperature (Kelvin) |
-| Process_temperature_K | Process temperature (Kelvin) |
-| Rotational_speed_rpm | Machine rotational speed (RPM) |
-| Torque_Nm | Applied torque (Newton metres) |
-| Tool_wear_min | Accumulated tool wear (minutes) |
-| Type | Machine type (Low, Medium, High) |
-| Machine failure | Target variable indicating equipment failure |
+| Feature                 | Description                                  |
+| ----------------------- | -------------------------------------------- |
+| Air_temperature_K       | Air temperature (Kelvin)                     |
+| Process_temperature_K   | Process temperature (Kelvin)                 |
+| Rotational_speed_rpm    | Machine rotational speed (RPM)               |
+| Torque_Nm               | Applied torque (Newton metres)               |
+| Tool_wear_min           | Accumulated tool wear (minutes)              |
+| Type                    | Machine type (Low, Medium, High)             |
+| Machine failure         | Target variable indicating equipment failure |
 
 For model development, the categorical machine type was one-hot encoded into two binary variables (`Type_M` and `Type_H`), with **Low-quality machines used as the reference category**. The `Machine failure` variable was used as the binary prediction target.
 
@@ -139,15 +139,15 @@ https://archive.ics.uci.edu/dataset/601/ai4i+2020+predictive+maintenance+dataset
 ### Folder Description
 
 | Folder | Purpose |
-|--------|---------|
-| **app** | Contains the FastAPI REST API, including the application entry point, prediction routes, model loading, and request/response schemas. |
-| **data** | Stores the original dataset and the processed dataset used for model development and evaluation. |
-| **images** | Stores EDA figures, model evaluation plots, SHAP visualisations, and deployment screenshots used in the project documentation. |
-| **models** | Stores the trained machine learning pipeline used for prediction and deployment. |
-| **notebooks** | Contains the Jupyter notebook documenting the end-to-end machine learning workflow, from exploratory data analysis through model evaluation and explainability. |
-| **reports** | Stores generated evaluation results, metrics, and exported reports. |
-| **src** | Contains reusable Python modules for data preprocessing, model training, evaluation, prediction, explainability, utilities, and project configuration. |
-| **tests** | Contains automated tests used to verify the correctness and reliability of the project modules. 
+|---|---|
+| **app** | FastAPI REST API, prediction routes, model loading, and schemas. |
+| **data** | Original and processed datasets used for modelling and evaluation. |
+| **images** | EDA, evaluation, SHAP, and deployment figures. |
+| **models** | Saved trained machine learning pipeline used for deployment. |
+| **notebooks** | Jupyter notebook documenting the complete analysis workflow. |
+| **reports** | Generated evaluation metrics and exported results. |
+| **src** | Reusable preprocessing, training, evaluation, prediction, and explainability modules. |
+| **tests** | Automated tests for validating project functionality. |
 
 ## Repository Structure
 
@@ -172,6 +172,7 @@ industrial-predictive-maintenance-machine-learning/
 ├── LICENSE
 ├── README.md
 └── requirements.txt
+```
 
 ## Machine Learning Workflow
 
@@ -232,6 +233,7 @@ Ablation Study
         ▼
 Deployment
 (FastAPI REST API + Streamlit Dashboard)
+```
 
 ## Model Development
 
@@ -262,7 +264,6 @@ XGBoost was selected as an advanced gradient boosting algorithm well suited to s
 Hyperparameter optimisation was performed using `RandomizedSearchCV` with stratified cross-validation. To prevent data leakage, SMOTE was incorporated within the machine learning pipeline and applied only to the training folds during cross-validation.
 
 The tuned XGBoost model demonstrated the strongest overall performance across the evaluated classification and ranking metrics, including Precision, Recall, F1 Score, ROC-AUC, and Average Precision. It was therefore selected as the final model for further evaluation, SHAP-based explainability, threshold optimisation, and deployment.
----
 
 ## Model Evaluation and Validation
 
@@ -285,14 +286,15 @@ Accuracy measures overall classification performance, while Precision, Recall, a
 In addition to these metrics, probability calibration and decision-threshold optimisation were performed to assess the reliability of predicted probabilities and improve the practical use of model predictions for maintenance decision-making.
 
 ### Confusion Matrix
+git --no-pager diff README.mdThe confusion matrix provides a detailed view of the classification performance of the final tuned XGBoost model on the independent test set.
 
-The confusion matrix provides a detailed view of the classification performance of the final tuned XGBoost model on the independent test set.
 
 <p align="center">
   <img src="images/tuned_xgboost_confusion_matrix.png"
        alt="Confusion Matrix - Tuned XGBoost"
        width="650">
 </p>
+**Figure.** Confusion matrix for the final tuned XGBoost model on the independent test set.
 
 The final tuned XGBoost model correctly classified **1,881 non-failure cases** and **55 machine failures**. It produced **51 false positives** and **13 false negatives**.
 
@@ -330,11 +332,14 @@ The tuned XGBoost model achieved a strong overall balance between failure detect
 
 The Receiver Operating Characteristic (ROC) curve evaluates the ability of the final tuned XGBoost model to distinguish between machine failure and non-failure cases across different classification thresholds.
 
+
 <p align="center">
   <img src="images/tuned_xgboost_roc_curve.png"
        alt="ROC Curve - Tuned XGBoost"
        width="650">
 </p>
+
+**Figure.** ROC curve for the final tuned XGBoost model on the independent test set.
 
 The final tuned XGBoost model achieved a **ROC-AUC of 0.970**, demonstrating strong discrimination between failure and non-failure cases.
 
@@ -342,14 +347,16 @@ The final tuned XGBoost model achieved a **ROC-AUC of 0.970**, demonstrating str
 
 The Precision–Recall curve provides a more informative evaluation of the final tuned XGBoost model on the minority failure class, particularly because machine failures represent only approximately **3.39%** of the dataset.
 
+
 <p align="center">
   <img src="images/tuned_xgboost_precision_recall_curve.png"
        alt="Precision-Recall Curve - Tuned XGBoost"
        width="650">
-</p>
+</p>>
+
+**Figure.** Precision–Recall curve for the final tuned XGBoost model on the independent test set.
 
 The final tuned XGBoost model achieved an **Average Precision (AP) of 0.771**, indicating strong performance in identifying machine failures despite the substantial class imbalance.
-
 Together with an ROC-AUC of **0.970** and Average Precision of **0.771**, these results supported the selection of the tuned XGBoost pipeline as the final model for further validation, SHAP-based explainability, threshold optimisation, and deployment.
 
 ### Probability Calibration
@@ -364,13 +371,14 @@ Probability calibration was assessed using the Brier Score, which measures the m
 The tuned XGBoost model achieved a lower Brier Score than the baseline, indicating more accurate probability estimates relative to the baseline prediction. This supports the use of the model's predicted failure probabilities as part of the subsequent threshold-based maintenance decision process.
 
 <p align="center">
-  <img src="images/calibration_curve.png" width="700">
+  <img src="images/calibration_curve.png"
+       alt="Calibration Curve - Tuned XGBoost"
+       width="700">
 </p>
 
 **Figure.** Calibration curve for the tuned XGBoost model compared with perfect calibration.
 
 The lower Brier Score indicates that the predicted probabilities are better calibrated than the baseline model, increasing confidence in the estimated machine failure probabilities used for operational decision-making.
-
 
 ### Threshold Optimisation
 
@@ -424,12 +432,14 @@ The ablation results show that removing the temperature features caused the larg
 Removing machine type produced a smaller reduction in Accuracy, Precision, Recall, and F1 Score, although ROC-AUC increased slightly from **0.9700** to **0.9715**. This indicates that machine type contributes to the overall classification performance even though its removal did not reduce discrimination as measured by ROC-AUC.
 
 Overall, the full feature set provided the strongest balance across the operationally relevant classification metrics, supporting its use in the final model.
+
 <p align="center">
-  <img src="images/ablation_study.png" width="750">
+  <img src="images/ablation_study.png"
+       alt="Ablation Study - Tuned XGBoost"
+       width="750">
 </p>
 
 **Figure.** Effect of feature-group removal on tuned XGBoost model performance.
-
 
 ## Explainable Artificial Intelligence (XAI)
 
@@ -457,24 +467,24 @@ Two complementary SHAP visualisations were used to examine global model behaviou
 #### Mean Absolute SHAP Importance
 
 <p align="center">
-  <img src="images/shap_mean_importance.png" width="700">
+  <img src="images/shap_mean_importance.png"
+       alt="Mean Absolute SHAP Feature Importance"
+       width="700">
 </p>
 
 **Figure.** Global feature importance based on mean absolute SHAP values.
-
 Mean absolute SHAP values summarise the average magnitude of each feature's contribution across observations. Larger values indicate features that have a greater overall influence on the model's predictions, regardless of whether that influence increases or decreases the model output.
-
 
 #### SHAP Summary Plot
 
-<p align="center">
-  <img src="images/shap_summary_plot.png" width="700">
+ <p align="center">
+  <img src="images/shap_summary_plot.png"
+       alt="SHAP Summary Plot"
+       width="700">
 </p>
-
 **Figure.** SHAP summary plot showing the magnitude and direction of feature contributions.
 
 The SHAP summary plot provides additional information about how feature values influence predictions. Each point represents an observation, while its horizontal position represents the SHAP contribution. Positive SHAP values push the model output toward the failure class, whereas negative SHAP values push it away from the failure class.
-
 
 ### Local Explainability
 
@@ -485,13 +495,14 @@ For each machine, positive SHAP contributions push the model output toward the f
 The example below illustrates a machine classified as a failure case and shows how its individual feature values contributed to the model's prediction.
 
 <p align="center">
-  <img src="images/shap_waterfall_failure.png" width="750">
+  <img src="images/shap_waterfall_failure.png"
+       alt="Local SHAP Waterfall Explanation"
+       width="750">
 </p>
 
+
 **Figure.** Local SHAP waterfall explanation for an individual machine failure prediction.
-
 The waterfall plot begins from the model's baseline output and shows how each feature moves the prediction toward its final model output. Features with positive contributions increase the model's tendency toward the failure class, while features with negative contributions reduce it. This provides an interpretable explanation of why the model produced the prediction for that specific machine.
-
 
 ### Supporting Maintenance Decisions
 
@@ -624,7 +635,6 @@ http://127.0.0.1:8000/docs
 ```
 
 Keep the FastAPI terminal running while using the Streamlit dashboard.
-
 ### Start the Streamlit Dashboard
 
 Open a second terminal, activate the same virtual environment, and run:
