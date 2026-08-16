@@ -1,445 +1,234 @@
 ﻿# Industrial Predictive Maintenance Using Explainable Machine Learning
 
-An end-to-end predictive maintenance system for machine failure prediction using tuned XGBoost, SHAP explainability, FastAPI, Supabase, and an interactive Streamlit operational dashboard.
+An end-to-end machine failure prediction system combining a tuned XGBoost model, SHAP explainability, FastAPI, Streamlit and Supabase to support risk-aware maintenance decisions.
 
 ## Project Overview
 
-Unexpected industrial equipment failures can cause unplanned downtime, maintenance costs, production disruption, and reduced operational efficiency.
+This project demonstrates how machine learning can be integrated into an operational predictive maintenance workflow rather than used only as a standalone prediction model.
 
-This project develops an end-to-end explainable machine learning system for predicting machine failure from operational conditions using the AI4I 2020 Predictive Maintenance Dataset.
+Using the AI4I 2020 Predictive Maintenance Dataset, the system predicts machine failure risk, explains individual predictions with SHAP, applies an operational maintenance threshold, exposes predictions through a REST API and presents results through an interactive dashboard.
 
-The machine learning workflow evaluates Logistic Regression, Random Forest, and XGBoost models. The final prediction system uses a tuned XGBoost classifier with SMOTE applied within the training pipeline to address class imbalance.
+The project focuses on three questions:
 
-Beyond model prediction, the project includes an operational decision layer based on predicted failure probability and an optimised decision threshold of `0.9252`. SHAP explanations provide insight into the features influencing individual predictions.
-
-The trained model is exposed through a FastAPI REST API. Prediction records are persisted in Supabase and presented through a Streamlit dashboard that supports prediction, explainability, historical monitoring, risk visualisation, and maintenance prioritisation.
+1. Can machine failure risk be predicted accurately from operating conditions?
+2. Can individual predictions be explained clearly enough to support maintenance decisions?
+3. Can the model be integrated into a usable decision-support system?
 
 ## System Architecture
 
 ```text
-AI4I 2020 Dataset
-        |
-        v
-Data Preprocessing
-        |
-        v
-Train/Test Split
-        |
-        v
-SMOTE + Tuned XGBoost
-        |
-        v
+Machine Operating Data
+        │
+        ▼
+Data Validation
+        │
+        ▼
+XGBoost + SMOTE Pipeline
+        │
+        ▼
 Failure Probability
-        |
-        +----------------------+
-        |                      |
-        v                      v
-Model Prediction       Operational Decision
-                       Threshold = 0.9252
-        |                      |
-        +----------+-----------+
-                   |
-                   v
-             SHAP Explanation
-                   |
-                   v
-              FastAPI API
-                   |
-          +--------+--------+
-          |                 |
-          v                 v
-       Supabase         Streamlit
-       History          Dashboard
-          |                 |
-          +--------+--------+
-                   |
-                   v
-       Monitoring and Maintenance
-              Prioritisation
+        │
+        ├──────────────► SHAP Explanation
+        │
+        ▼
+Operational Threshold
+        │
+        ▼
+Maintenance Decision
+        │
+        ├──────────────► FastAPI
+        │
+        ├──────────────► Supabase History
+        │
+        └──────────────► Streamlit Dashboard
 ```
 
 ## Key Features
 
-- Binary machine failure prediction using operational machine measurements.
-- Comparison of Logistic Regression, Random Forest, and XGBoost classifiers.
-- SMOTE integrated within the training pipeline to address class imbalance.
-- Stratified model development and evaluation.
-- Hyperparameter optimisation for the final XGBoost model.
-- Probability-based operational decision threshold.
-- SHAP global and local explainability.
-- Individual prediction feature-contribution analysis.
-- FastAPI REST interface for model inference.
-- Supabase persistence for prediction history.
-- Streamlit dashboard for interactive prediction and monitoring.
-- Operational overview of historical predictions.
-- Risk-distribution visualisation.
-- Failure-probability trend monitoring.
-- Threshold-based maintenance alerts.
-- Maintenance priority queue.
-- Historical prediction filtering.
-- Automated testing across machine learning and API components.
+- Machine failure probability prediction using tuned XGBoost
+- Class imbalance handling with SMOTE
+- Decision-specific maintenance threshold
+- Global and local SHAP explainability
+- FastAPI prediction service
+- Streamlit operational dashboard
+- Supabase prediction history
+- Maintenance alert and prioritisation workflow
+- Automated testing across the ML and API layers
 
 ## Model Inputs
-
-The production model uses seven features:
 
 | Feature | Description |
 | --- | --- |
 | `Air_temperature_K` | Air temperature in Kelvin |
 | `Process_temperature_K` | Process temperature in Kelvin |
-| `Rotational_speed_rpm` | Rotational speed in revolutions per minute |
-| `Torque_Nm` | Torque in Newton-metres |
-| `Tool_wear_min` | Tool wear in minutes |
-| `Type_M` | Encoded medium-quality machine type |
-| `Type_H` | Encoded high-quality machine type |
+| `Rotational_speed_rpm` | Rotational speed in RPM |
+| `Torque_Nm` | Machine torque in Newton metres |
+| `Tool_wear_min` | Accumulated tool wear in minutes |
+| `Type_M` | Medium machine type indicator |
+| `Type_H` | High machine type indicator |
 
-Machine type `L` is represented by `Type_M = 0` and `Type_H = 0`.
-
-## Prediction and Operational Decision Layer
-
-The system distinguishes between the model's predicted class and the operational maintenance decision.
-
-The XGBoost model produces a machine failure probability and class prediction. Separately, the application compares the failure probability with the configured operational threshold:
-
-```text
-Decision threshold = 0.9252
-```
-
-When the predicted failure probability reaches or exceeds this threshold, the application identifies the prediction as requiring maintenance attention.
-
-This separation allows model output to be translated into an explicit operational decision rule rather than treating the classifier output alone as a maintenance action.
-
-## Explainable AI
-
-SHAP is used to explain the behaviour of the XGBoost model.
-
-For individual predictions, the dashboard identifies the most influential features and their SHAP values.
-
-- Positive SHAP values increase predicted failure risk.
-- Negative SHAP values decrease predicted failure risk.
-- Larger absolute SHAP values indicate greater influence on the prediction.
-
-This provides users with both a prediction and an explanation of the operational factors that contributed most strongly to it.
+Low machine type is represented by `Type_M = 0` and `Type_H = 0`.
 
 ## Model Performance
 
-The final tuned XGBoost pipeline was evaluated on a held-out test set of 2,000 observations. Because machine failures are relatively rare in the dataset, performance is reported using class-specific metrics alongside ROC-AUC and PR-AUC rather than accuracy alone.
-
-### Predictive Performance
+The production XGBoost pipeline was evaluated on a held-out test set of 2,000 observations.
 
 | Metric | Result |
-|---|---:|
+| --- | ---: |
 | Accuracy | 96.80% |
 | ROC-AUC | 0.9700 |
 | PR-AUC | 0.7715 |
 | Failure Precision | 51.89% |
 | Failure Recall | 80.88% |
-| Failure F1-score | 63.22% |
+| Failure F1 | 63.22% |
 
-At the model's standard classification rule, 55 of the 68 failure cases in the held-out test set were detected. The confusion matrix was:
-
-- True negatives: 1,881
-- False positives: 51
-- False negatives: 13
-- True positives: 55
+Because machine failures are relatively rare, evaluation considers recall, precision, F1, ROC-AUC and PR-AUC rather than relying on accuracy alone.
 
 ### Operational Decision Threshold
 
-The application uses a separate operational decision threshold of **0.9252** for maintenance prioritisation. This threshold does not change the underlying model probabilities; it determines when a prediction is escalated to a maintenance-required decision.
+The deployed decision layer uses a probability threshold of `0.9252`.
 
 At this threshold:
 
 | Metric | Result |
-|---|---:|
+| --- | ---: |
 | Accuracy | 98.35% |
 | Failure Precision | 84.31% |
 | Failure Recall | 63.24% |
-| Failure F1-score | 72.27% |
+| Failure F1 | 72.27% |
 
-The threshold therefore produces fewer false maintenance alerts and substantially higher precision, while accepting lower failure recall. This trade-off illustrates why operational threshold selection should be interpreted in the context of maintenance objectives and the relative costs of missed failures and unnecessary interventions.
-## Operational Dashboard
+This threshold increases the precision of maintenance alerts while accepting lower failure recall. It is therefore treated as an operational trade-off rather than a universally superior model setting.
 
-The Streamlit dashboard provides:
+Further model details are available in [docs/MODEL.md](docs/MODEL.md).
 
-- machine-condition input controls;
-- predicted machine state;
-- failure probability;
-- operational decision threshold;
-- maintenance decision;
-- SHAP feature contributions;
-- prediction history;
-- operational summary metrics;
-- risk distribution;
-- failure-probability trend;
-- maintenance alerts;
-- maintenance priority queue;
-- history filtering.
+## Explainability and Decision Support
 
-Maintenance-alert severity is an application-level prioritisation rule and should not be interpreted as an additional machine learning prediction.
+SHAP is used to show which operating conditions contribute most strongly to each machine failure prediction.
 
-## Screenshots and Visual Results
+The application separates:
+
+```text
+Model prediction
+        ↓
+Failure probability
+        ↓
+Operational threshold
+        ↓
+Maintenance decision
+```
+
+This allows the system to provide both predictive information and an interpretable operational recommendation.
+
+## System Demo
 
 ### Streamlit Dashboard
 
-![Streamlit Predictive Maintenance Dashboard](images/streamlit_dashboard.png)
-
-The interactive dashboard combines machine input controls, model predictions, failure probability, SHAP explanations, operational monitoring, and maintenance decision support.
+![Streamlit predictive maintenance dashboard](images/streamlit_dashboard.png)
 
 ### SHAP Explainability
 
-![SHAP Summary Plot](images/shap_summary_plot.png)
-
-The SHAP summary visualises the global influence of the model features on predicted machine failure risk.
-
-### Decision Threshold Optimisation
-
-![XGBoost Threshold Optimisation](images/tuned_xgboost_threshold_optimisation.png)
-
-The threshold analysis supports the separation between predictive probability and the operational maintenance decision threshold used by the application.
-## Prediction History
-
-Predictions generated through the application can be persisted to Supabase.
-
-Stored information includes machine inputs, predicted class, failure probability, decision threshold, operational decision, prediction timestamp, and SHAP explanation information.
-
-The `/history` API endpoint provides recent records to the Streamlit monitoring interface.
-
-## API
-
-The FastAPI application exposes the model through REST endpoints.
-
-### Health Check
-
-```http
-GET /health
-```
-
-Used to confirm that the API is running.
-
-### Prediction
-
-```http
-POST /predict
-```
-
-Example request:
-
-```json
-{
-  "Air_temperature_K": 298.9,
-  "Process_temperature_K": 309.0,
-  "Rotational_speed_rpm": 1410,
-  "Torque_Nm": 65.7,
-  "Tool_wear_min": 191,
-  "Type_M": 0,
-  "Type_H": 0
-}
-```
-
-The response contains the predicted class, failure probability, operational decision threshold, decision prediction, and top SHAP contributors.
-
-### Prediction History
-
-```http
-GET /history?limit=20
-```
-
-Returns recent stored prediction records.
+![SHAP feature contribution summary](images/shap_summary_plot.png)
 
 ## Technology Stack
 
-| Component | Technology |
+| Area | Technology |
 | --- | --- |
-| Programming | Python |
+| Language | Python |
+| Machine Learning | XGBoost, scikit-learn, imbalanced-learn |
+| Explainability | SHAP |
 | Data Processing | pandas, NumPy |
-| Machine Learning | scikit-learn, XGBoost |
-| Imbalanced Learning | imbalanced-learn / SMOTE |
-| Explainable AI | SHAP |
-| Statistical Evaluation | statsmodels |
-| API | FastAPI, Uvicorn |
-| Dashboard | Streamlit |
-| Database | Supabase |
-| Visualisation | Matplotlib, Altair |
+| API | FastAPI, Pydantic, Uvicorn |
+| Dashboard | Streamlit, Altair |
+| Persistence | Supabase |
 | Testing | pytest |
 | Model Persistence | joblib |
-| Version Control | Git and GitHub |
 
 ## Project Structure
 
 ```text
 industrial-predictive-maintenance-machine-learning/
-|
-|-- app/                         # FastAPI application and API routes
-|-- data/
-|   |-- raw/                     # Original dataset
-|   `-- processed/               # Processed modelling dataset
-|-- images/                      # EDA, evaluation and explainability figures
-|-- models/                      # Trained production model
-|-- notebooks/                   # Jupyter analysis and model-development notebook
-|-- reports/                     # Evaluation outputs and reports
-|-- src/                         # Reusable machine learning modules
-|-- tests/                       # Automated ML and API tests
-|-- streamlit_app.py             # Interactive operational dashboard
-|-- .env.example                 # Environment-variable template
-|-- .gitignore
-|-- DATA_DICTIONARY.md
-|-- LICENSE
-|-- README.md
-`-- requirements.txt
+├── app/                  # FastAPI application and database integration
+├── data/                 # Project data
+├── docs/                 # Technical documentation
+├── images/               # Selected public project visuals
+├── models/               # Production model
+├── src/                  # Machine learning and prediction logic
+├── tests/                # Automated test suite
+├── DATA_DICTIONARY.md
+├── LICENSE
+├── README.md
+├── requirements.txt
+├── .env.example
+└── streamlit_app.py
 ```
 
-## Environment Compatibility
+Detailed exploratory analysis and development artefacts are intentionally excluded from the public repository to keep the project focused on the reproducible production workflow.
 
-The production model was originally serialised using the following core machine learning environment:
+## Quick Start
 
-```text
-Python:             3.13.9
-scikit-learn:       1.7.2
-XGBoost:            3.2.0
-imbalanced-learn:   0.14.0
-pandas:             2.3.3
-NumPy:              2.3.5
-```
-
-Because persisted Python machine learning objects can be sensitive to library-version changes, reproducing the compatible environment is recommended when loading the supplied model artifact.
-
-## Installation
-
-Clone the repository and enter the project directory:
+Clone the repository:
 
 ```bash
 git clone https://github.com/vivaluv/industrial-predictive-maintenance-machine-learning.git
 cd industrial-predictive-maintenance-machine-learning
 ```
 
-Create a virtual environment:
-
-```bash
-python -m venv venv
-```
-
-On Windows:
+Create and activate the validated environment:
 
 ```powershell
-.\venv\Scripts\Activate.ps1
+python -m venv venv_compat
+.\venv_compat\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
 ```
 
-Install the project dependencies:
+Create a local `.env` file from `.env.example` and provide your Supabase credentials where required.
 
-```bash
-python -m pip install --upgrade pip
-pip install -r requirements.txt
-```
-
-## Environment Variables
-
-Create a `.env` file in the project root using `.env.example` as the template:
-
-```env
-SUPABASE_URL=your_supabase_project_url
-SUPABASE_KEY=your_supabase_key
-```
-
-Do not commit real credentials to version control.
-
-## Running the FastAPI Backend
-
-From the project root:
+Start the FastAPI service:
 
 ```powershell
-.\venv\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+.\venv_compat\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8000
 ```
 
-The API will be available locally on port `8000`.
-
-## Running the Streamlit Dashboard
-
-Keep the FastAPI server running and open another terminal:
+Start the Streamlit dashboard in a second terminal:
 
 ```powershell
-.\venv\Scripts\python.exe -m streamlit run .\streamlit_app.py
+.\venv_compat\Scripts\python.exe -m streamlit run .\streamlit_app.py
 ```
 
-Streamlit will display the local dashboard address in the terminal.
+Complete environment instructions are available in [docs/SETUP.md](docs/SETUP.md).
 
 ## Testing
 
-The project includes automated tests for:
-
-- data loading and preprocessing;
-- target and train/test validation;
-- model construction and training;
-- model evaluation;
-- calibration and threshold optimisation;
-- SHAP explainability;
-- prediction utilities;
-- model and JSON persistence;
-- FastAPI health checks;
-- normal and high-risk API predictions;
-- prediction history;
-- API input validation.
-
-Run the complete test suite with:
-
-```powershell
-python -m pytest .\tests -v
-```
-
-Current validated status:
+The validated automated test suite currently contains:
 
 ```text
 31 passed
 ```
 
-Dependency-level deprecation warnings from SHAP and the FastAPI/Starlette testing stack may be reported without affecting test success.
+Run the tests with:
 
-## Model Validation
-
-The final system has been validated end to end using the compatible model environment.
-
-Validation includes:
-
-```text
-Model loading              PASS
-Normal-risk prediction     PASS
-High-risk prediction       PASS
-SHAP explanations          PASS
-FastAPI                    PASS
-Supabase history           PASS
-Streamlit dashboard        PASS
-Maintenance alerts         PASS
-History filtering          PASS
-Automated tests            31/31 PASS
+```powershell
+.\venv_compat\Scripts\python.exe -m pytest .\tests -q
 ```
 
-## Reproducibility
+See [docs/TESTING.md](docs/TESTING.md) for testing details.
 
-The repository separates data preparation, training, evaluation, prediction, explainability, API logic, dashboard functionality, and automated testing into reusable components.
+## Limitations and Future Work
 
-The trained production artifact is retained separately from development candidates and backups, while the compatible package environment is documented to support reproducible inference.
+The current system is based on the AI4I 2020 benchmark dataset rather than live industrial telemetry. Real-world deployment would require validation against equipment-specific operating conditions, failure costs and maintenance policies.
 
-## Limitations
+Future development could include model drift monitoring, real-time sensor integration, cost-sensitive threshold optimisation, continuous model monitoring and validation using operational industrial data.
 
-The project uses the AI4I 2020 benchmark dataset rather than live industrial sensor data. Results therefore demonstrate the machine learning and application architecture under benchmark conditions and should not be interpreted as validation for deployment on a specific physical machine or industrial site.
+## Documentation
 
-The maintenance threshold and alert-severity rules are operational decision rules implemented by the application. They would require domain-specific validation, cost analysis, safety assessment, and monitoring before use in a real industrial environment.
-
-Model performance may also change under data drift, different equipment populations, sensor characteristics, or operating conditions.
-
-## Future Development
-
-Potential extensions include:
-
-- validation using real industrial equipment data;
-- temporal and streaming sensor ingestion;
-- automated data-drift and model-drift monitoring;
-- model calibration monitoring;
-- equipment-specific maintenance thresholds;
-- maintenance-cost and downtime-aware decision optimisation;
-- authentication and role-based dashboard access;
-- cloud deployment and CI/CD;
-- automated model retraining and model registry integration.
+| Document | Purpose |
+| --- | --- |
+| [API Reference](docs/API.md) | API endpoints, request schemas and responses |
+| [Model Documentation](docs/MODEL.md) | Model performance, threshold logic and explainability |
+| [Setup Guide](docs/SETUP.md) | Environment and application setup |
+| [Testing Guide](docs/TESTING.md) | Automated testing and validation |
+| [Data Dictionary](DATA_DICTIONARY.md) | Dataset feature definitions |
 
 ## License
 
-See the `LICENSE` file for licensing information.
+See [LICENSE](LICENSE) for licensing information.

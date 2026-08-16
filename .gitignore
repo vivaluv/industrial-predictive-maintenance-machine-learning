@@ -57,3 +57,8 @@ models/xgboost_pipeline_candidate.joblib
 
 # Local Streamlit secrets
 .streamlit/secrets.toml
+
+# Local analysis archive
+analysis_archive/
+
+README_before_curation.md

@@ -100,3 +100,12 @@ The deployed prediction system returns:
 - **Explainability:** SHAP (SHapley Additive exPlanations)
 - **Operational Decision Threshold:** `0.9252`
 - **Deployment:** FastAPI REST API with Streamlit Dashboard
+## Dataset Source and Licence
+
+This project uses the AI4I 2020 Predictive Maintenance Dataset from the UCI Machine Learning Repository.
+
+- Dataset DOI: `10.24432/C5HS5C`
+- Dataset licence: Creative Commons Attribution 4.0 International (CC BY 4.0)
+- The processed dataset included in this repository is derived from the original AI4I 2020 dataset.
+
+The MIT licence in this repository applies to the project software and code. The dataset remains subject to its original licence and attribution requirements.
