@@ -27,37 +27,39 @@ Exact package versions are provided in `requirements.txt`.
 git clone https://github.com/vivaluv/industrial-predictive-maintenance-machine-learning.git
 cd industrial-predictive-maintenance-machine-learning
 ```
+
 ## Create a Virtual Environment
 
 Create a dedicated virtual environment:
 
-```bash
-python -m venv venv_compat
+```powershell
+python -m venv .venv
 ```
 
 Activate it on Windows PowerShell:
 
 ```powershell
-.\venv_compat\Scripts\Activate.ps1
+.\.venv\Scripts\Activate.ps1
 ```
 
 ## Install Dependencies
 
 Install the pinned project dependencies:
 
-```bash
+```powershell
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 ```
+
 ## Environment Variables
 
-Copy the example environment file:
+Create a local environment file from the provided example:
 
 ```powershell
 Copy-Item .env.example .env
 ```
 
-Then update `.env` with your own Supabase project credentials:
+Then update `.env` with your Supabase project credentials:
 
 ```text
 SUPABASE_URL=your_supabase_project_url
@@ -68,10 +70,10 @@ Do not commit the real `.env` file or expose production credentials in the repos
 
 ## Run the FastAPI Service
 
-Start the API locally with:
+Start the API locally:
 
 ```powershell
-.\venv_compat\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
 ```
 
 The API will be available at:
@@ -85,25 +87,24 @@ FastAPI interactive documentation is available at:
 ```text
 http://127.0.0.1:8000/docs
 ```
+
 ## Run the Streamlit Dashboard
 
-With the FastAPI service running, open a second PowerShell terminal in the project directory and start the dashboard:
+With the FastAPI service running, open a second terminal in the project directory, activate the same virtual environment, and start the dashboard:
 
 ```powershell
-.\venv_compat\Scripts\python.exe -m streamlit run .\streamlit_app.py
+python -m streamlit run .\streamlit_app.py
 ```
 
 Streamlit will display the local dashboard URL in the terminal.
 
 ## Compatibility Note
 
-The production model was validated using the pinned package versions in `requirements.txt`.
+The production model was validated using Python 3.13.9 and the pinned package versions in `requirements.txt`.
 
-Using significantly different versions of scikit-learn or XGBoost may cause model-loading compatibility warnings or inconsistent behaviour. For reproducible results, use the provided environment and pinned dependencies.
+Using significantly different versions of scikit-learn or XGBoost may cause model-loading compatibility warnings or inconsistent behaviour. For reproducible results, use the documented Python version and pinned dependencies.
 
-## Next Steps
-
-For additional technical information, see:
+## Related Documentation
 
 - [API Reference](API.md)
 - [Model and Decision Logic](MODEL.md)
