@@ -1,112 +1,59 @@
-# ==========================================
-# Python
-# ==========================================
-
+﻿# Python
 __pycache__/
 *.py[cod]
-*$py.class
+*.pyo
+*.pyd
+*.so
 
-
-# ==========================================
-# Virtual Environments
-# ==========================================
-
+# Virtual environments
 venv/
+venv_compat/
 .venv/
-env/
-ENV/
 
+# Environment / secrets
+.env
+.env.*
+!.env.example
 
-# ==========================================
 # Jupyter
-# ==========================================
-
 .ipynb_checkpoints/
 
-
-# ==========================================
-# IDE
-# ==========================================
-
+# IDE / editor
 .vscode/
 .idea/
 
-
-# ==========================================
-# Operating System
-# ==========================================
-
+# OS files
 .DS_Store
 Thumbs.db
+desktop.ini
 
-
-# ==========================================
-# Environment Variables
-# ==========================================
-
-.env
-.env.*
-
-
-# ==========================================
-# Python Build
-# ==========================================
-
-build/
-dist/
-*.egg-info/
-*.whl
-
-
-# ==========================================
-# Pytest / Coverage
-# ==========================================
-
+# Testing / coverage
 .pytest_cache/
 .coverage
-.coverage.*
 htmlcov/
 coverage.xml
 
+# Build / packaging
+build/
+dist/
+*.egg-info/
 
-# ==========================================
 # Logs
-# ==========================================
-
 *.log
+logs/
 
-
-# ==========================================
-# Temporary Files
-# ==========================================
-
+# Temporary files
 *.tmp
+*.temp
 *.bak
-*.swp
 
+# Local documentation / dependency backups
+README_backup.md
+requirements_backup.txt
 
-# ==========================================
-# Reports (Generated)
-# ==========================================
+# Model development artifacts
+models/xgboost_pipeline_backup.joblib
+models/xgboost_pipeline_candidate.joblib
 
-reports/*.json
-reports/*.csv
-
-
-# ==========================================
-# Model Files
-# ==========================================
-
-# Ignore generated model artifacts
-models/*.pkl
-models/*.joblib
-
-# Keep the production model
-!models/xgboost_pipeline.joblib
-
-
-# ==========================================
-# Streamlit Secrets
-# ==========================================
-
+# Local Streamlit secrets
 .streamlit/secrets.toml

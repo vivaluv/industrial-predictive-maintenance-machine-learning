@@ -41,6 +41,16 @@ def _validate_input(X):
 def _validate_threshold(threshold):
     """
     Validate a probability decision threshold.
+
+    Parameters
+    ----------
+    threshold : float
+        Probability threshold between 0 and 1.
+
+    Raises
+    ------
+    ValueError
+        If threshold is outside the valid range.
     """
 
     if not 0 <= threshold <= 1:
@@ -68,7 +78,7 @@ def predict_failure(
     Returns
     -------
     numpy.ndarray
-        Predicted class labels.
+        Predicted binary class labels.
     """
 
     _validate_input(X)
@@ -94,14 +104,14 @@ def predict_probability(
     Returns
     -------
     numpy.ndarray
-        Failure probabilities.
+        Probability of machine failure.
     """
 
     _validate_input(X)
 
-    return model.predict_proba(
-        X
-    )[:, 1]
+    probabilities = model.predict_proba(X)
+
+    return probabilities[:, 1]
 
 
 def predict_risk_level(
@@ -122,13 +132,12 @@ def predict_risk_level(
         Feature matrix.
 
     threshold : float, default=DECISION_THRESHOLD
-        Probability threshold used for the
-        operational maintenance decision.
+        Operational probability threshold.
 
     Returns
     -------
     numpy.ndarray
-        Binary maintenance decisions.
+        Binary operational decisions.
     """
 
     _validate_input(X)
@@ -152,7 +161,7 @@ def predict_with_explanation(
     """
     Predict machine failure together with
     probability, operational decision,
-    and SHAP explanations.
+    and local SHAP explanations.
 
     Parameters
     ----------
@@ -163,17 +172,19 @@ def predict_with_explanation(
         Feature matrix.
 
     threshold : float, default=DECISION_THRESHOLD
-        Probability threshold used for the
-        operational maintenance decision.
+        Operational probability threshold.
 
     top_n : int, default=5
         Number of leading SHAP contributors
-        returned for each observation.
+        returned for each prediction.
 
     Returns
     -------
     pandas.DataFrame
-        Prediction results with SHAP explanations.
+        Prediction results containing class,
+        probability, decision threshold,
+        operational decision, and SHAP
+        contributors.
     """
 
     _validate_input(X)
@@ -194,18 +205,18 @@ def predict_with_explanation(
     # ============================
 
     predicted_classes = predict_failure(
-        model,
-        X,
+        model=model,
+        X=X,
     )
 
     probabilities = predict_probability(
-        model,
-        X,
+        model=model,
+        X=X,
     )
 
     decision_predictions = predict_risk_level(
-        model,
-        X,
+        model=model,
+        X=X,
         threshold=threshold,
     )
 
@@ -218,8 +229,8 @@ def predict_with_explanation(
     )
 
     shap_values = compute_shap_values(
-        explainer,
-        X,
+        explainer=explainer,
+        X=X,
     )
 
     # ============================
@@ -255,6 +266,4 @@ def predict_with_explanation(
             }
         )
 
-    return pd.DataFrame(
-        results
-    )
+    return pd.DataFrame(results)

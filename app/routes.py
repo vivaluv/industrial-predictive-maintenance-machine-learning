@@ -8,6 +8,10 @@ from fastapi import (
 )
 
 from app.model_loader import model
+from app.supabase_client import (
+    get_prediction_history,
+    save_prediction,
+)
 from app.schemas import (
     PredictionRequest,
     PredictionResponse,
@@ -22,11 +26,9 @@ from src.predict import (
     predict_with_explanation,
 )
 
-
 logger = logging.getLogger(
     __name__
 )
-
 
 router = APIRouter()
 
@@ -78,6 +80,38 @@ def predict_failure(
             .to_dict()
         )
 
+        database_data = {
+            "machine_type": (
+                "M"
+                if request_data["Type_M"] == 1
+                else (
+                    "H"
+                    if request_data["Type_H"] == 1
+                    else "L"
+                )
+            ),
+            "air_temperature_k": request_data[
+                "Air_temperature_K"
+            ],
+            "process_temperature_k": request_data[
+                "Process_temperature_K"
+            ],
+            "rotational_speed_rpm": request_data[
+                "Rotational_speed_rpm"
+            ],
+            "torque_nm": request_data[
+                "Torque_Nm"
+            ],
+            "tool_wear_min": request_data[
+                "Tool_wear_min"
+            ],
+        }
+
+        save_prediction(
+            request_data=database_data,
+            prediction=prediction,
+        )
+
         return prediction
 
     except Exception as error:
@@ -91,5 +125,55 @@ def predict_failure(
             detail=(
                 "Machine failure prediction "
                 "could not be completed."
+            ),
+        ) from error
+
+
+@router.get(
+    "/history",
+    summary="Get Prediction History",
+    description=(
+        "Retrieve recent machine failure predictions "
+        "stored in Supabase."
+    ),
+)
+def prediction_history(
+    limit: int = 20,
+):
+    """
+    Return recent prediction records.
+    """
+
+    try:
+
+        if limit <= 0:
+            raise HTTPException(
+                status_code=400,
+                detail="limit must be greater than 0.",
+            )
+
+        history = get_prediction_history(
+            limit=limit,
+        )
+
+        return {
+            "count": len(history),
+            "predictions": history,
+        }
+
+    except HTTPException:
+        raise
+
+    except Exception as error:
+
+        logger.exception(
+            "Prediction history retrieval failed."
+        )
+
+        raise HTTPException(
+            status_code=500,
+            detail=(
+                "Prediction history could not "
+                "be retrieved."
             ),
         ) from error
