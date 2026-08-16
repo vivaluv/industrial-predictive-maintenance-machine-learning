@@ -1,4 +1,4 @@
-# Industrial Predictive Maintenance Using Explainable Machine Learning
+﻿# Industrial Predictive Maintenance Using Explainable Machine Learning
 
 An end-to-end predictive maintenance system for machine failure prediction using tuned XGBoost, SHAP explainability, FastAPI, Supabase, and an interactive Streamlit operational dashboard.
 
@@ -121,6 +121,42 @@ For individual predictions, the dashboard identifies the most influential featur
 
 This provides users with both a prediction and an explanation of the operational factors that contributed most strongly to it.
 
+## Model Performance
+
+The final tuned XGBoost pipeline was evaluated on a held-out test set of 2,000 observations. Because machine failures are relatively rare in the dataset, performance is reported using class-specific metrics alongside ROC-AUC and PR-AUC rather than accuracy alone.
+
+### Predictive Performance
+
+| Metric | Result |
+|---|---:|
+| Accuracy | 96.80% |
+| ROC-AUC | 0.9700 |
+| PR-AUC | 0.7715 |
+| Failure Precision | 51.89% |
+| Failure Recall | 80.88% |
+| Failure F1-score | 63.22% |
+
+At the model's standard classification rule, 55 of the 68 failure cases in the held-out test set were detected. The confusion matrix was:
+
+- True negatives: 1,881
+- False positives: 51
+- False negatives: 13
+- True positives: 55
+
+### Operational Decision Threshold
+
+The application uses a separate operational decision threshold of **0.9252** for maintenance prioritisation. This threshold does not change the underlying model probabilities; it determines when a prediction is escalated to a maintenance-required decision.
+
+At this threshold:
+
+| Metric | Result |
+|---|---:|
+| Accuracy | 98.35% |
+| Failure Precision | 84.31% |
+| Failure Recall | 63.24% |
+| Failure F1-score | 72.27% |
+
+The threshold therefore produces fewer false maintenance alerts and substantially higher precision, while accepting lower failure recall. This trade-off illustrates why operational threshold selection should be interpreted in the context of maintenance objectives and the relative costs of missed failures and unnecessary interventions.
 ## Operational Dashboard
 
 The Streamlit dashboard provides:
@@ -141,6 +177,25 @@ The Streamlit dashboard provides:
 
 Maintenance-alert severity is an application-level prioritisation rule and should not be interpreted as an additional machine learning prediction.
 
+## Screenshots and Visual Results
+
+### Streamlit Dashboard
+
+![Streamlit Predictive Maintenance Dashboard](images/streamlit_dashboard.png)
+
+The interactive dashboard combines machine input controls, model predictions, failure probability, SHAP explanations, operational monitoring, and maintenance decision support.
+
+### SHAP Explainability
+
+![SHAP Summary Plot](images/shap_summary_plot.png)
+
+The SHAP summary visualises the global influence of the model features on predicted machine failure risk.
+
+### Decision Threshold Optimisation
+
+![XGBoost Threshold Optimisation](images/tuned_xgboost_threshold_optimisation.png)
+
+The threshold analysis supports the separation between predictive probability and the operational maintenance decision threshold used by the application.
 ## Prediction History
 
 Predictions generated through the application can be persisted to Supabase.
@@ -253,7 +308,7 @@ Because persisted Python machine learning objects can be sensitive to library-ve
 Clone the repository and enter the project directory:
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/vivaluv/industrial-predictive-maintenance-machine-learning.git
 cd industrial-predictive-maintenance-machine-learning
 ```
 
