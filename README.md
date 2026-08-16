@@ -12,29 +12,27 @@ A tuned XGBoost model predicts machine failure risk, SHAP explains the factors i
 
 ```text
 Machine Operating Data
-        ¦
-        ?
+        |
+        v
 Data Validation
-        ¦
-        ?
+        |
+        v
 XGBoost + SMOTE Pipeline
-        ¦
-        ?
+        |
+        v
 Failure Probability
-        ¦
-        +--------------? SHAP Explanation
-        ¦
-        ?
+        |
+        +--> SHAP Explanation
+        |
+        v
 Operational Threshold
-        ¦
-        ?
+        |
+        v
 Maintenance Decision
-        ¦
-        +--------------? FastAPI
-        ¦
-        +--------------? Supabase History
-        ¦
-        +--------------? Streamlit Dashboard
+        |
+        +--> FastAPI
+        +--> Supabase History
+        +--> Streamlit Dashboard
 ```
 
 ## Model Performance
@@ -79,20 +77,19 @@ See [docs/MODEL.md](docs/MODEL.md) for the full threshold evaluation and model v
 
 ```text
 industrial-predictive-maintenance-machine-learning/
-+-- app/                  # FastAPI application and database integration
-+-- data/                 # Project data
-+-- docs/                 # Technical documentation
-+-- models/               # Production model
-+-- src/                  # Machine learning and prediction logic
-+-- tests/                # Automated test suite
-+-- DATA_DICTIONARY.md
-+-- LICENSE
-+-- README.md
-+-- requirements.txt
-+-- .env.example
-+-- streamlit_app.py
+|-- app/                  # FastAPI application and database integration
+|-- data/                 # Project data
+|-- docs/                 # Technical documentation
+|-- models/               # Production model
+|-- src/                  # Machine learning and prediction logic
+|-- tests/                # Automated test suite
+|-- DATA_DICTIONARY.md
+|-- LICENSE
+|-- README.md
+|-- requirements.txt
+|-- .env.example
+\-- streamlit_app.py
 ```
-
 
 ## Quick Start
 
