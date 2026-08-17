@@ -1,4 +1,4 @@
-﻿import requests
+import requests
 import pandas as pd
 import streamlit as st
 import altair as alt
@@ -199,7 +199,7 @@ if predict_button:
             response = requests.post(
                 API_URL,
                 json=payload,
-                timeout=10,
+                timeout=90,
             )
 
         if response.status_code == 200:
@@ -759,7 +759,7 @@ try:
     history_response = requests.get(
         history_url,
         params={"limit": history_limit},
-        timeout=10,
+        timeout=90,
     )
 
     if history_response.status_code == 200:
