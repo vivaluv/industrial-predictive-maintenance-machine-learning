@@ -15,7 +15,7 @@ from src.config import (
 
 st.set_page_config(
     page_title="Industrial Predictive Maintenance",
-    page_icon="âš™ï¸",
+    page_icon="\u2699\ufe0f",
     layout="wide",
 )
 
@@ -41,7 +41,7 @@ def reset_dashboard():
 # ============================
 
 st.title(
-    "âš™ï¸ Industrial Predictive Maintenance"
+    "Industrial Predictive Maintenance"
 )
 
 st.subheader(
@@ -172,13 +172,13 @@ st.sidebar.subheader(
 
 
 predict_button = st.sidebar.button(
-    "ðŸš€ Predict Machine Failure",
+    "Predict Machine Failure",
     width="stretch",
 )
 
 
 st.sidebar.button(
-    "ðŸ”„ Reset",
+    "Reset",
     width="stretch",
     on_click=reset_dashboard,
 )
@@ -318,13 +318,13 @@ with col1:
             ):
 
                 st.success(
-                    "ðŸŸ¢ No Failure"
+                    "No Failure"
                 )
 
             else:
 
                 st.error(
-                    "ðŸ”´ Failure"
+                    "Failure"
                 )
 
         else:
@@ -370,13 +370,13 @@ with col1:
             if probability >= threshold:
 
                 st.error(
-                    "ðŸ”´ High Failure Risk"
+                    "High Failure Risk"
                 )
 
             else:
 
                 st.success(
-                    "ðŸŸ¢ Low Failure Risk"
+                    "Low Failure Risk"
                 )
 
 
@@ -425,13 +425,13 @@ with col1:
             ):
 
                 st.success(
-                    "âœ… Normal Operation"
+                    "Normal Operation"
                 )
 
             else:
 
                 st.error(
-                    "âš ï¸ Maintenance Required"
+                    "Maintenance Required"
                 )
 
         else:
@@ -700,7 +700,7 @@ with col2:
 # ============================
 
 with st.expander(
-    "â„¹ï¸ Model Information"
+    "Model Information"
 ):
 
     st.write(
