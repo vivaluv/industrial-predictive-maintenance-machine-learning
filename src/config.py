@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 # ==============================
@@ -88,9 +89,9 @@ MODEL_PATH = MODELS_DIR / MODEL_FILENAME
 # ==========================
 
 API_HOST = "127.0.0.1"
-
 API_PORT = 8000
 
-API_URL = (
-    f"http://{API_HOST}:{API_PORT}/predict"
+API_URL = os.getenv(
+    "API_URL",
+    f"http://{API_HOST}:{API_PORT}/predict",
 )
