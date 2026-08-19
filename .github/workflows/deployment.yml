@@ -18,4 +18,4 @@ jobs:
     steps:
       - name: Verify live Streamlit app
         run: |
-          curl --fail --location --retry 5 --retry-delay 10 --max-time 120 https://vivaluv-predictive-maintenance.streamlit.app
+          curl --fail --retry 5 --retry-delay 10 --max-time 120 https://vivaluv-predictive-maintenance.streamlit.app/_stcore/health
