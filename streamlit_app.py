@@ -27,6 +27,9 @@ st.set_page_config(
 if "api_result" not in st.session_state:
     st.session_state.api_result = None
 
+if "monitoring_active" not in st.session_state:
+    st.session_state.monitoring_active = False
+
 
 def reset_dashboard():
     """
@@ -163,6 +166,37 @@ payload = {
 # ============================
 # Sidebar Prediction Controls
 # ============================
+
+st.sidebar.divider()
+
+st.sidebar.subheader(
+    "Monitoring"
+)
+
+start_monitoring = st.sidebar.button(
+    "Start Monitoring",
+    width="stretch",
+)
+
+stop_monitoring = st.sidebar.button(
+    "Stop Monitoring",
+    width="stretch",
+)
+
+if start_monitoring:
+    st.session_state.monitoring_active = True
+
+if stop_monitoring:
+    st.session_state.monitoring_active = False
+
+if st.session_state.monitoring_active:
+    st.sidebar.success(
+        "Monitoring: Active"
+    )
+else:
+    st.sidebar.info(
+        "Monitoring: Stopped"
+    )
 
 st.sidebar.divider()
 
