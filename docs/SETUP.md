@@ -2,13 +2,13 @@
 
 ## Requirements
 
-The project was validated with:
+The project has been validated with:
 
 ```text
 Python 3.13.9
 ```
 
-The production model was created and tested with the following core environment:
+Core production dependencies include:
 
 ```text
 NumPy 2.3.5
@@ -19,7 +19,7 @@ XGBoost 3.2.0
 SHAP 0.52.0
 ```
 
-Exact package versions are provided in `requirements.txt`.
+All project dependencies and versions are pinned in `requirements.txt`.
 
 ## Clone the Repository
 
@@ -28,81 +28,143 @@ git clone https://github.com/vivaluv/industrial-predictive-maintenance-machine-l
 cd industrial-predictive-maintenance-machine-learning
 ```
 
-## Create a Virtual Environment
+## Create the Virtual Environment
 
-Create a dedicated virtual environment:
+Confirm that the Python interpreter you intend to use is Python 3.13.9:
+
+```powershell
+python --version
+```
+
+If `python` resolves to Python 3.13.9, create the virtual environment with:
 
 ```powershell
 python -m venv .venv
 ```
 
-Activate it on Windows PowerShell:
+If another Python version is returned, invoke your installed Python 3.13.9 interpreter explicitly when creating `.venv`.
+
+Do not recreate an existing project environment using a different Python version.
+
+## Windows PowerShell
+
+Virtual-environment activation is optional.
+
+If PowerShell permits local script execution:
 
 ```powershell
 .\.venv\Scripts\Activate.ps1
 ```
 
-## Install Dependencies
-
-Install the pinned project dependencies:
+If activation is blocked by the Windows execution policy, changing the system policy is not required. Use the virtual-environment interpreter directly:
 
 ```powershell
-python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe --version
+```
+
+The expected result is:
+
+```text
+Python 3.13.9
+```
+
+## Install Dependencies
+
+Install the pinned dependencies using the project virtual environment:
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install --upgrade pip
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+```
+
+Verify dependency consistency:
+
+```powershell
+.\.venv\Scripts\python.exe -m pip check
+```
+
+A healthy environment should report:
+
+```text
+No broken requirements found.
 ```
 
 ## Environment Variables
 
-Create a local environment file from the provided example:
+Create a local environment file from the provided template:
 
 ```powershell
 Copy-Item .env.example .env
 ```
 
-Then update `.env` with your Supabase project credentials:
+Add your Supabase credentials to `.env`:
 
 ```text
 SUPABASE_URL=your_supabase_project_url
 SUPABASE_KEY=your_supabase_key
 ```
 
-Do not commit the real `.env` file or expose production credentials in the repository.
+The real `.env` file is excluded from version control and must not be committed or shared publicly.
 
 ## Run the FastAPI Service
 
-Start the API locally:
+Start the API:
 
 ```powershell
-python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+.\.venv\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8000
 ```
 
-The API will be available at:
+Local API:
 
 ```text
 http://127.0.0.1:8000
 ```
 
-FastAPI interactive documentation is available at:
+Interactive FastAPI documentation:
 
 ```text
 http://127.0.0.1:8000/docs
 ```
 
-## Run the Streamlit Dashboard
+Health endpoint:
 
-With the FastAPI service running, open a second terminal in the project directory, activate the same virtual environment, and start the dashboard:
-
-```powershell
-python -m streamlit run .\streamlit_app.py
+```text
+http://127.0.0.1:8000/health
 ```
 
-Streamlit will display the local dashboard URL in the terminal.
+## Run the Streamlit Dashboard
 
-## Compatibility Note
+With FastAPI running, open a second terminal in the project directory and start the dashboard:
 
-The production model was validated using Python 3.13.9 and the pinned package versions in `requirements.txt`.
+```powershell
+.\.venv\Scripts\python.exe -m streamlit run streamlit_app.py
+```
 
-Using significantly different versions of scikit-learn or XGBoost may cause model-loading compatibility warnings or inconsistent behaviour. For reproducible results, use the documented Python version and pinned dependencies.
+Streamlit will display the local dashboard address in the terminal.
+
+## Validate the Installation
+
+Run the automated test suite:
+
+```powershell
+.\.venv\Scripts\python.exe -m pytest tests -q
+```
+
+Current validated result:
+
+```text
+31 passed
+```
+
+See [TESTING.md](TESTING.md) for detailed validation coverage and known third-party dependency warnings.
+
+## Compatibility
+
+The production environment is validated with Python 3.13.9 and the pinned dependencies in `requirements.txt`.
+
+Using materially different versions of scikit-learn, XGBoost or related dependencies may produce model-loading compatibility warnings or inconsistent inference behaviour.
+
+For reproducible results, use the documented Python version and pinned environment.
 
 ## Related Documentation
 

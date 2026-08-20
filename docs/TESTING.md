@@ -2,12 +2,12 @@
 
 ## Overview
 
-The project includes automated tests covering the machine learning pipeline, prediction logic, explainability utilities and FastAPI endpoints.
+The project includes automated tests across the machine-learning and API layers, covering data preprocessing, prediction logic, explainability, validation and API behaviour.
 
-The current validated test suite contains:
+The current test suite contains:
 
 ```text
-31 tests
+31 automated tests
 ```
 
 ## Run the Test Suite
@@ -15,57 +15,69 @@ The current validated test suite contains:
 From the project root, run:
 
 ```powershell
-.\venv_compat\Scripts\python.exe -m pytest .\tests -v
+.\.venv\Scripts\python.exe -m pytest tests -q
 ```
 
-For a shorter output:
+For detailed test output:
 
 ```powershell
-.\venv_compat\Scripts\python.exe -m pytest .\tests -q
+.\.venv\Scripts\python.exe -m pytest tests -v
 ```
+
 ## Test Coverage
 
-The automated tests cover the main components of the predictive maintenance system, including:
+The automated test suite covers:
 
 - data preprocessing and validation
-- model evaluation
-- prediction logic
+- model evaluation and prediction logic
 - SHAP explainability utilities
 - training and utility functions
 - FastAPI health checks
 - normal-risk and high-risk prediction requests
+- request validation
 - prediction history retrieval
 - invalid history-limit handling
 
-The API tests mock Supabase interactions so the test suite does not depend on a live database connection.
-```
+Supabase interactions are mocked during API testing, allowing the automated suite to run without a live database connection.
+
 ## Validated Result
 
-The full automated test suite currently passes:
+The current validated result is:
 
 ```text
 31 passed
 ```
 
-The test run also reports four dependency-related warnings from FastAPI/Starlette and SHAP. These are non-fatal deprecation warnings and do not indicate project test failures.
+The test run also reports four non-fatal third-party dependency warnings associated with FastAPI/Starlette and SHAP/Matplotlib. These warnings do not represent project test failures.
 
 ## Additional Validation
 
-The Streamlit application has also been checked with Python compilation:
+Check the Streamlit application for Python syntax and compilation errors with:
 
 ```powershell
-.\venv_compat\Scripts\python.exe -m py_compile .\streamlit_app.py
+.\.venv\Scripts\python.exe -m py_compile streamlit_app.py
 ```
 
-Before committing repository changes, formatting can be checked with:
+Verify dependency consistency with:
+
+```powershell
+.\.venv\Scripts\python.exe -m pip check
+```
+
+Check repository formatting before committing changes with:
 
 ```powershell
 git diff --check
 ```
+
+## Continuous Integration
+
+GitHub Actions runs the automated test suite using Python 3.13.9.
+
+A separate production verification workflow checks the health of the deployed Streamlit application.
 
 ## Related Documentation
 
 - [API Reference](API.md)
 - [Setup](SETUP.md)
 - [Model and Decision Logic](MODEL.md)
-```

@@ -4,7 +4,7 @@
 
 The FastAPI service exposes the predictive maintenance system through endpoints for API status, machine failure prediction and prediction history.
 
-The API supports the Streamlit dashboard and can also be used by external clients that need access to model inference.
+It supports the Streamlit dashboard and can also be used by external clients that require programmatic access to model inference.
 
 ## Base URL
 
@@ -12,15 +12,21 @@ For local development:
 
 ```text
 http://127.0.0.1:8000
-
 ```
+
+Interactive API documentation is available at:
+
+```text
+http://127.0.0.1:8000/docs
+```
+
 ## API Home
 
 ```http
 GET /
 ```
 
-Returns a confirmation that the predictive maintenance API is running.
+Confirms that the predictive maintenance API is running.
 
 Example response:
 
@@ -45,13 +51,16 @@ Example response:
   "status": "healthy"
 }
 ```
+
 ## Machine Failure Prediction
 
 ```http
 POST /predict
 ```
 
-Predicts the probability of machine failure using the trained XGBoost model and returns both the model prediction and the threshold-based maintenance decision.
+Predicts machine failure risk using the production XGBoost model.
+
+The endpoint returns the model prediction, failure probability, operational maintenance decision and the three most influential local SHAP contributors.
 
 ### Request Fields
 
@@ -62,8 +71,19 @@ Predicts the probability of machine failure using the trained XGBoost model and 
 | `Rotational_speed_rpm` | int | Machine rotational speed in RPM |
 | `Torque_Nm` | float | Machine torque in Newton metres |
 | `Tool_wear_min` | int | Accumulated tool wear in minutes |
-| `Type_M` | int | Medium-quality machine indicator, 0 or 1 |
-| `Type_H` | int | High-quality machine indicator, 0 or 1 |
+| `Type_M` | int | Medium-quality machine indicator: `0` or `1` |
+| `Type_H` | int | High-quality machine indicator: `0` or `1` |
+
+### Request Validation
+
+The API validates incoming prediction data before model inference.
+
+- `Rotational_speed_rpm`, `Torque_Nm` and `Tool_wear_min` must not be negative.
+- `Type_M` and `Type_H` must each be either `0` or `1`.
+- `Type_M` and `Type_H` cannot both equal `1`.
+- Unexpected request fields are rejected.
+
+Invalid prediction requests return HTTP `422`.
 
 ### Machine Type Encoding
 
@@ -74,8 +94,6 @@ Low:     Type_M = 0, Type_H = 0
 Medium:  Type_M = 1, Type_H = 0
 High:    Type_M = 0, Type_H = 1
 ```
-
-`Type_M` and `Type_H` cannot both equal `1`.
 
 ### Example Request
 
@@ -90,22 +108,23 @@ High:    Type_M = 0, Type_H = 1
   "Type_H": 0
 }
 ```
+
 ### Response Fields
 
 | Field | Description |
 | --- | --- |
 | `predicted_class` | Model classification: `0 = No Failure`, `1 = Failure` |
 | `failure_probability` | Predicted probability of machine failure |
-| `decision_threshold` | Operational threshold used for the maintenance decision |
-| `decision_prediction` | Threshold-based decision: `0 = Normal Operation`, `1 = Maintenance Required` |
-| `top_contributors` | Most influential local SHAP contributors |
+| `decision_threshold` | Operational threshold applied to the failure probability |
+| `decision_prediction` | Maintenance decision: `0 = Normal Operation`, `1 = Maintenance Required` |
+| `top_contributors` | Three most influential local SHAP contributors |
 
 Each item in `top_contributors` contains:
 
-- `feature`
-- `feature_value`
-- `shap_value`
-- `absolute_shap`
+- `feature` — feature associated with the contribution
+- `feature_value` — input value supplied to the model
+- `shap_value` — signed SHAP contribution
+- `absolute_shap` — absolute contribution used for ranking
 
 ### Example Response
 
@@ -125,13 +144,16 @@ Each item in `top_contributors` contains:
   ]
 }
 ```
+
+The example above shows the response structure. The production endpoint returns the three highest-ranked SHAP contributors.
+
 ## Prediction History
 
 ```http
 GET /history
 ```
 
-Retrieves recent machine failure predictions stored in Supabase.
+Retrieves recent prediction records stored in Supabase.
 
 The endpoint accepts an optional `limit` query parameter.
 
@@ -147,48 +169,44 @@ Example:
 GET /history?limit=20
 ```
 
+The response contains:
+
+- `count` — number of prediction records returned
+- `predictions` — array of stored prediction records
+
 If `limit` is less than or equal to `0`, the API returns HTTP `400`.
 
-### Example Response Structure
-
-```json
-{
-  "count": 2,
-  "predictions": [
-    {},
-    {}
-  ]
-}
-```
 ## Operational Decision Logic
 
 The model produces a machine failure probability.
 
-The application compares this probability with the configured operational threshold:
+The application compares that probability with the configured operational threshold:
 
 ```text
 0.9252
 ```
 
-A probability at or above the threshold results in:
+A probability greater than or equal to the threshold produces:
 
 ```text
 Maintenance Required
 ```
 
-Otherwise, the operational decision is:
+A probability below the threshold produces:
 
 ```text
 Normal Operation
 ```
 
-The threshold is an operational decision rule and is separate from the model's default class prediction.
+The operational threshold is a decision rule applied after probability estimation and is separate from the model's default class prediction.
 
 ## Error Handling
 
-Prediction failures and history retrieval failures return HTTP `500`.
-
-Invalid history limits return HTTP `400`.
+| HTTP Status | Meaning |
+| --- | --- |
+| `400` | Invalid history limit |
+| `422` | Prediction request failed input validation |
+| `500` | Prediction or history retrieval failed during processing |
 
 ## Related Documentation
 
